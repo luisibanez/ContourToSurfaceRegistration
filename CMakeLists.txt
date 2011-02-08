@@ -24,5 +24,16 @@ mark_as_advanced(LIBRARY_OUTPUT_PATH EXECUTABLE_OUTPUT_PATH)
 
 file(MAKE_DIRECTORY ${LIBRARY_OUTPUT_PATH} ${EXECUTABLE_OUTPUT_PATH})
 
+include(${PROJECT_SOURCE_DIR}/CMake/ExternalData.cmake)
+list(APPEND ExternalData_URL_TEMPLATES
+  "http://midas.kitware.com/api/rest/midas.bitstream.by.hash?hash=%(hash)&algorithm=%(algo)"
+  )
+
+macro(itk_add_test)
+  ExternalData_add_test(WHSData ${ARGN})
+endmacro()
+
 add_subdirectory(src)
 add_subdirectory(test)
+
+ExternalData_Add_Target(WHSData)
