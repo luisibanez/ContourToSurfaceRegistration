@@ -1,0 +1,17 @@
+This code is inteded to perform a registration between a 2D contour and a 3D
+surface. The 2D contour is extracted from a 2D image, and the 3D surface is
+encoded as a 3D volume with a distance map to the surface.
+
+The driving scenario for this registration is the alignment of 2D mouse brain
+slices with a 3D atlas.
+
+See
+
+http://www.incf.org
+http://www.itk.org
+http://www.alleninstitute.org
+
+
+This code is copyrighted by the Insight Software Consortium
+and it is distributed under the Apache 2 license.
+
