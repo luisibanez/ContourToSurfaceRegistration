@@ -33,5 +33,7 @@ int main( int argc, char * argv [] )
   registration.SetInput2DImage( argv[1] );
   registration.SetInput3DImage( argv[2] );
 
+  registration.Execute();
+
   return EXIT_SUCCESS;
 }

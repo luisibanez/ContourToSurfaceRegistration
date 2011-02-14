@@ -16,10 +16,8 @@
  *
  *=========================================================================*/
 
-#include "itkEuclideanDistancePointMetric.h"
-#include "itkLevenbergMarquardtOptimizer.h"
-#include "itkPointSetToPointSetRegistrationMethod.h"
-#include "itkSignedMaurerDistanceMapImageFilter.h"
+#include "itkPointSet.h"
+#include "itkImage.h"
 
 class ContourToSurfaceRegistration
 {
@@ -31,28 +29,25 @@ public:
   void SetInput2DImage( const char * filename );
   void SetInput3DImage( const char * filename );
 
+  void Execute();
+
 private:
 
+  void GeneratePointSetFrom2DImage();
+  void PointSetRegistration();
+
   typedef itk::PointSet< double, 3 >            PointSetType;
+  typedef itk::Image< unsigned char, 3 >        ImageMaskType;
+  typedef itk::Image< float, 3 >                DistanceMapImageType;
 
   typedef PointSetType::PointType               PointType;
   typedef PointSetType::PointsContainer         PointsContainer;
 
-  typedef itk::EuclideanDistancePointMetric<
-    PointSetType, PointSetType>                 MetricType;
-
-  typedef MetricType::TransformType             TransformBaseType;
-
-  typedef itk::LevenbergMarquardtOptimizer      OptimizerType;
-
-  typedef itk::PointSetToPointSetRegistrationMethod<
-    PointSetType, PointSetType >                RegistrationType;
-
-  RegistrationType::Pointer     m_RegistrationMethod;
-
 private:
 
-  std::string      m_Input2DFileName;
-  std::string      m_Input3DFileName;
+  std::string             m_Input2DFileName;
+  std::string             m_Input3DFileName;
 
+  PointSetType::Pointer           m_PointSetFrom2DImage;
+  DistanceMapImageType::Pointer   m_DistanceMapImage;
 };

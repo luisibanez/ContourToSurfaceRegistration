@@ -18,6 +18,12 @@
 
 #include "ContourToSurfaceRegistration.h"
 
+#include "itkBinaryMaskToNarrowBandPointSetFilter.h"
+#include "itkEuclideanDistancePointMetric.h"
+#include "itkLevenbergMarquardtOptimizer.h"
+#include "itkPointSetToPointSetRegistrationMethod.h"
+#include "itkSignedMaurerDistanceMapImageFilter.h"
+#include "itkImageFileReader.h"
 
 ContourToSurfaceRegistration::
 ContourToSurfaceRegistration()
@@ -48,4 +54,60 @@ SetInput3DImage( const char * filename )
   this->m_Input3DFileName = filename;
 }
 
+
+void
+ContourToSurfaceRegistration::
+GeneratePointSetFrom2DImage()
+{
+  typedef itk::BinaryMaskToNarrowBandPointSetFilter< ImageMaskType, PointSetType >  MaskToPointSetFilterType;
+  MaskToPointSetFilterType::Pointer  maskToPointSetFilter = MaskToPointSetFilterType::New();
+
+  typedef itk::ImageFileReader< ImageMaskType >  SliceImageReaderType;
+
+  SliceImageReaderType::Pointer reader = SliceImageReaderType::New();
+  reader->SetFileName( this->m_Input2DFileName );
+
+  maskToPointSetFilter->SetInput( reader->GetOutput() );
+
+  maskToPointSetFilter->Update();
+
+  this->m_PointSetFrom2DImage = maskToPointSetFilter->GetOutput();
+
+  this->m_PointSetFrom2DImage->Print( std::cout );
+}
+
+
+void
+ContourToSurfaceRegistration::
+PointSetRegistration()
+{
+  typedef itk::EuclideanDistancePointMetric<
+    PointSetType, PointSetType>                 MetricType;
+
+  typedef MetricType::TransformType             TransformBaseType;
+
+  typedef itk::LevenbergMarquardtOptimizer      OptimizerType;
+
+  typedef itk::PointSetToPointSetRegistrationMethod<
+    PointSetType, PointSetType >                RegistrationType;
+
+  RegistrationType::Pointer     registrationMethod;
+
+  typedef itk::ImageFileReader< DistanceMapImageType >  DistanceImageReaderType;
+
+  DistanceImageReaderType::Pointer reader = DistanceImageReaderType::New();
+  reader->SetFileName( this->m_Input3DFileName );
+
+  reader->Update();
+
+  reader->GetOutput()->Print( std::cout );
+}
+
+void
+ContourToSurfaceRegistration::
+Execute()
+{
+  this->GeneratePointSetFrom2DImage();
+  this->PointSetRegistration();
+}
 
