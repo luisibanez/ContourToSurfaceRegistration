@@ -27,6 +27,7 @@ file(MAKE_DIRECTORY ${LIBRARY_OUTPUT_PATH} ${EXECUTABLE_OUTPUT_PATH})
 include(${PROJECT_SOURCE_DIR}/CMake/ExternalData.cmake)
 list(APPEND ExternalData_URL_TEMPLATES
   "file://local/home/ibanez/data/INCF/WHS/%(algo)/%(hash)"
+  "file://local/home/ibanez/data/INCF/Yuko/test data101202/Lhx6bmp/%(algo)/%(hash)"
   "http://midas.kitware.com/api/rest/midas.bitstream.by.hash?hash=%(hash)&algorithm=%(algo)"
   )
 
