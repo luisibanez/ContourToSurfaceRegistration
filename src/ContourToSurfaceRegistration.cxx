@@ -24,6 +24,8 @@
 #include "itkPointSetToPointSetRegistrationMethod.h"
 #include "itkSignedMaurerDistanceMapImageFilter.h"
 #include "itkImageFileReader.h"
+#include "itkTranslationTransform.h"
+
 
 ContourToSurfaceRegistration::
 ContourToSurfaceRegistration()
@@ -81,6 +83,8 @@ void
 ContourToSurfaceRegistration::
 PointSetRegistration()
 {
+  const unsigned int Dimension = 3;
+
   typedef itk::EuclideanDistancePointMetric<
     PointSetType, PointSetType>                 MetricType;
 
@@ -90,6 +94,8 @@ PointSetRegistration()
 
   typedef itk::PointSetToPointSetRegistrationMethod<
     PointSetType, PointSetType >                RegistrationType;
+
+  typedef itk::TranslationTransform< double, Dimension >      TransformType;
 
   RegistrationType::Pointer     registrationMethod;
 
@@ -101,6 +107,49 @@ PointSetRegistration()
   reader->Update();
 
   reader->GetOutput()->Print( std::cout );
+
+  OptimizerType::Pointer optimizer = OptimizerType::New();
+
+  optimizer->SetUseCostFunctionGradient(false);
+
+  RegistrationType::Pointer registration = RegistrationType::New();
+
+  MetricType::Pointer metric = MetricType::New();
+
+  TransformType::Pointer transform = TransformType::New();
+
+  // Scale the translation components of the Transform in the Optimizer
+  OptimizerType::ScalesType scales( transform->GetNumberOfParameters() );
+  scales.Fill( 0.01 );
+
+
+  unsigned long   numberOfIterations =  100;
+  double          gradientTolerance  =  1e-5;    // convergence criterion
+  double          valueTolerance     =  1e-5;    // convergence criterion
+  double          epsilonFunction    =  1e-6;   // convergence criterion
+
+
+  optimizer->SetScales( scales );
+  optimizer->SetNumberOfIterations( numberOfIterations );
+  optimizer->SetValueTolerance( valueTolerance );
+  optimizer->SetGradientTolerance( gradientTolerance );
+  optimizer->SetEpsilonFunction( epsilonFunction );
+
+  // Start from an Identity transform (in a normal case, the user
+  // can probably provide a better guess than the identity...
+  transform->SetIdentity();
+
+  registration->SetInitialTransformParameters( transform->GetParameters() );
+
+  //------------------------------------------------------
+  // Connect all the components required for Registration
+  //------------------------------------------------------
+  registration->SetMetric(        metric        );
+  registration->SetOptimizer(     optimizer     );
+  registration->SetTransform(     transform     );
+  registration->SetFixedPointSet( this->m_PointSetFrom2DImage );
+//  registration->SetMovingPointSet(   movingPointSet   );
+
 }
 
 void
